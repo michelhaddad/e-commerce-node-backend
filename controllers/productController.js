@@ -57,7 +57,7 @@ const getProductImage = (req, res, next) => {
           res.json({status: 'Product has no image.'});
         } else {
           res.statusCode = 200;
-          res.setHeader('Content-Type', 'image/*');
+          res.setHeader('Content-Type', 'image/png');
           res.send(productImage.img.data);
         }
       }, (err) => next(err)).
