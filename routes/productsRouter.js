@@ -5,6 +5,7 @@ const authenticate = require('../authenticate');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const productImageUrl = 'https://serene-brushlands-68192.herokuapp.com/products/image/';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -18,33 +19,11 @@ const storage = multer.diskStorage({
 const upload = multer({storage: storage});
 
 const Products = require('../models/products');
+const ProductsImages = require('../models/productImages');
 
 const productRouter = express.Router();
 
 productRouter.use(bodyParser.json());
-
-productRouter.route('/:id/image').
-    put(upload.single('image'), (req, res, next) => {
-      const obj = {
-        data: fs.readFileSync(path.join(__dirname + '/../uploads/' + req.file.filename)),
-        contentType: 'image/png',
-      };
-      Products.findByIdAndUpdate(req.params.id, {$set: {img: obj}}, {new: true}).
-          then((product) => {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(product);
-          }, (err) => next(err)).catch((err) => next(err));
-    }).
-    get((req, res, next) => {
-      Products.findById(req.params.id).
-          then((product) => {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'image/*');
-            res.send(product.img.data)
-          }, (err) => next(err)).
-          catch((err) => next(err));
-    });
 
 productRouter.route('/').
     get((req, res, next) => {
@@ -99,6 +78,52 @@ productRouter.route('/:id').
             res.setHeader('Content-Type', 'application/json');
             res.json(resp);
           }, (err) => next(err)).catch((err) => next(err));
+        });
+
+productRouter.route('/image/:id').
+    get((req, res, next) => {
+      ProductsImages.findById(req.params.id).
+          then((productImage) => {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'image/*');
+            res.send(productImage.img.data);
+          }, (err) => next(err)).
+          catch((err) => next(err));
+    }).
+    post(upload.single('image'), authenticate.verifyUser,
+        authenticate.verifyAdmin, (req, res, next) => {
+          const obj = {
+            data: fs.readFileSync(
+                path.join(__dirname + '/../uploads/' + req.file.filename)),
+            contentType: 'image/png',
+          };
+          const productImage = new ProductsImages();
+          productImage._id = req.params.id;
+          productImage.img = obj;
+          productImage.save().then(() => {
+            Products.findByIdAndUpdate(req.params.id, {$set: {imageUrl: productImageUrl + req.params.id}}, {new: true}).
+                then((product) => {
+                  console.log('Product image added ', product);
+                  res.statusCode = 200;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.json({status: 'Successfully uploaded image.'});
+                });
+          }, (err) => next(err)).catch((err) => next(err));
+        }).
+    put(upload.single('image'), authenticate.verifyUser,
+        authenticate.verifyAdmin, (req, res, next) => {
+          const obj = {
+            data: fs.readFileSync(
+                path.join(__dirname + '/../uploads/' + req.file.filename)),
+            contentType: 'image/png',
+          };
+          ProductsImages.findByIdAndUpdate(req.params.id, {$set: {img: obj}},
+              {new: true}).
+              then((product) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json({status: 'Successfully modified image.'});
+              }, (err) => next(err)).catch((err) => next(err));
         });
 
 module.exports = productRouter;
