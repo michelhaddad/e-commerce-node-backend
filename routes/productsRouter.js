@@ -27,8 +27,7 @@ productRouter.route('/:id').
     })
 
 productRouter.route('/image/:id').
-    get(productActions.getProductImage).
     post(upload.single('image'), authenticate.verifyUser, authenticate.verifyAdmin, productActions.addProductImage).
-    put(upload.single('image'), authenticate.verifyUser, authenticate.verifyAdmin, productActions.updateProduct);
+    put(upload.single('image'), authenticate.verifyUser, authenticate.verifyAdmin, productActions.updateProductImage);
 
 module.exports = productRouter;
