@@ -10,14 +10,14 @@ const usersActions = require('../controllers/usersController');
 router.use(bodyParser.json());
 
 router.get(
-  '/',
+  '/:id',
   authenticate.verifyUser,
   authenticate.verifyAdmin,
-  usersActions.findUser,
+  usersActions.getUserById,
 );
 
-router.post('/signup', usersActions.signUp);
+router.post('/signup', usersActions.signup);
 
-router.post('/login', passport.authenticate('local'), usersActions.logIn);
+router.post('/login', passport.authenticate('local'), usersActions.login);
 
 module.exports = router;
