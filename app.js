@@ -15,7 +15,11 @@ const app = express();
 
 // Connect to MongoDB
 const url = process.env.MONGODB_URL;
-const connect = mongoose.connect(url, {useFindAndModify: false});
+const connect = mongoose.connect(url, {
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useNewUrlParser: true
+});
 connect.then((db) => {
     console.log("Successfully connected to the MongoDB server");
 }, (err) => {

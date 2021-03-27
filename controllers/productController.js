@@ -1,7 +1,6 @@
 const Products = require('../models/products');
+const aws = require('../utils/aws');
 const fs = require('fs');
-const path = require('path');
-const productImageUrl = 'https://serene-brushlands-68192.herokuapp.com/images/';
 
 const indexProducts = (req, res, next) => {
   Products.find({}).then((products) => {
@@ -37,7 +36,7 @@ const updateProduct = (req, res, next) => {
         res.setHeader('Content-Type', 'application/json');
         res.json(product);
       }, (err) => next(err)).catch((err) => next(err));
-}
+};
 
 const deleteProduct = (req, res, next) => {
   Products.findByIdAndRemove(req.params.id).then((resp) => {
@@ -45,26 +44,37 @@ const deleteProduct = (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     res.json(resp);
   }, (err) => next(err)).catch((err) => next(err));
-}
+};
 
 const addProductImage = (req, res, next) => {
-  Products.findByIdAndUpdate(req.params.id, {$set: {imageUrl: productImageUrl + req.params.id + '.png'}}, {new: true}).
+  Products.findById(req.params.id).
       then((product) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({status: 'Successfully uploaded image.'});
-      }, (err) => next(err)).catch((err) => next(err));
-}
+        const s3 = new aws.S3();
+        const params = {
+          ACL: 'public-read',
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Body: fs.createReadStream(req.file.path),
+          Key: `products/images/${req.params.id + req.file.originalname}`,
+          ContentType: req.file.mimetype,
+        };
 
-const updateProductImage = (req, res, next) => {
-
-  Products.findByIdAndUpdate(req.params.id, {$set: {imageUrl: productImageUrl + req.params.id + '.png'}}, {new: true}).
-      then((product) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({status: 'Successfully uploaded image.'});
+        s3.upload(params, (err, data) => {
+          if (err) {
+            throw err;
+          }
+          if (data) {
+            fs.unlinkSync(req.file.path);
+            product.imageUrl = data.Location;
+            product.save();
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.json({status: 'Successfully uploaded image.'});
+          } else {
+            throw new Error('Image could not be saved to the S3 bucket.');
+          }
+        });
       }, (err) => next(err)).catch((err) => next(err));
-}
+};
 
 module.exports = {
   indexProducts,
@@ -73,5 +83,4 @@ module.exports = {
   updateProduct,
   deleteProduct,
   addProductImage,
-  updateProductImage
 };
