@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 require('dotenv').config()
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/usersRouter');
 const productRouter = require('./routes/productsRouter');
 
 const app = express();
