@@ -6,6 +6,4 @@ aws.config.update({
   region: process.env.AWS_REGION,
 });
 
-module.exports = aws
-
-
+module.exports = aws;

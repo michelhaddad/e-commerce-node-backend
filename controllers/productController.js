@@ -3,56 +3,79 @@ const aws = require('../utils/aws');
 const fs = require('fs');
 
 const indexProducts = (req, res, next) => {
-  Products.find({}).then((products) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.json(products);
-  }, (err) => next(err)).catch((err) => next(err));
+  Products.find({})
+    .then(
+      (products) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(products);
+      },
+      (err) => next(err),
+    )
+    .catch((err) => next(err));
 };
 
 const createProduct = (req, res, next) => {
-  Products.create(req.body).then((product) => {
-    console.log('Product Created ', product);
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.json(product);
-  }, (err) => next(err)).catch((err) => next(err));
+  Products.create(req.body)
+    .then(
+      (product) => {
+        console.log('Product Created ', product);
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(product);
+      },
+      (err) => next(err),
+    )
+    .catch((err) => next(err));
 };
 
 const getProductById = (req, res, next) => {
-  Products.findById(req.params.id).
-      then((product) => {
+  Products.findById(req.params.id)
+    .then(
+      (product) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(product);
-      }, (err) => next(err)).
-      catch((err) => next(err));
+      },
+      (err) => next(err),
+    )
+    .catch((err) => next(err));
 };
 
 const updateProduct = (req, res, next) => {
-  Products.findByIdAndUpdate(req.params.id, {$set: req.body}, {new: true}).
-      then((product) => {
+  Products.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true })
+    .then(
+      (product) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(product);
-      }, (err) => next(err)).catch((err) => next(err));
+      },
+      (err) => next(err),
+    )
+    .catch((err) => next(err));
 };
 
 const deleteProduct = (req, res, next) => {
-  Products.findByIdAndRemove(req.params.id).then((resp) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.json(resp);
-  }, (err) => next(err)).catch((err) => next(err));
+  Products.findByIdAndRemove(req.params.id)
+    .then(
+      (resp) => {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(resp);
+      },
+      (err) => next(err),
+    )
+    .catch((err) => next(err));
 };
 
 const addProductImage = (req, res, next) => {
-  Products.findById(req.params.id).
-      then((product) => {
+  Products.findById(req.params.id)
+    .then(
+      (product) => {
         if (!product) {
           res.statusCode = 404;
           res.setHeader('Content-Type', 'application/json');
-          res.json({status: 'Product not found.'});
+          res.json({ status: 'Product not found.' });
           return;
         }
         const s3 = new aws.S3();
@@ -74,12 +97,15 @@ const addProductImage = (req, res, next) => {
             product.save();
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
-            res.json({status: 'Successfully uploaded image.'});
+            res.json({ status: 'Successfully uploaded image.' });
           } else {
             throw new Error('Image could not be saved to the S3 bucket.');
           }
         });
-      }, (err) => next(err)).catch((err) => next(err));
+      },
+      (err) => next(err),
+    )
+    .catch((err) => next(err));
 };
 
 module.exports = {
