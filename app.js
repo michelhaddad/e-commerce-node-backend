@@ -1,21 +1,25 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var passport = require('passport');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const passport = require('passport');
 const mongoose = require('mongoose');
 require('dotenv').config()
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var productRouter = require('./routes/productsRouter')
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const productRouter = require('./routes/productsRouter');
 
-var app = express();
+const app = express();
 
 // Connect to MongoDB
 const url = process.env.MONGODB_URL;
-const connect = mongoose.connect(url, {useFindAndModify: false});
+const connect = mongoose.connect(url, {
+    useFindAndModify: false,
+    useCreateIndex: true,
+    useNewUrlParser: true
+});
 connect.then((db) => {
     console.log("Successfully connected to the MongoDB server");
 }, (err) => {

@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const authenticate = require('../authenticate');
-const upload = require('../utils/multer-config');
+const multer = require('multer');
 
 const productActions = require('../controllers/productController');
 const productRouter = express.Router();
@@ -27,7 +27,17 @@ productRouter.route('/:id').
     })
 
 productRouter.route('/image/:id').
-    post(upload.single('image'), authenticate.verifyUser, authenticate.verifyAdmin, productActions.addProductImage).
-    put(upload.single('image'), authenticate.verifyUser, authenticate.verifyAdmin, productActions.updateProductImage);
+    post(
+        multer({ dest: 'tmp/', limits: { fieldSize: 8 * 1024 * 1024 }}).single('image'),
+        authenticate.verifyUser,
+        authenticate.verifyAdmin,
+        productActions.addProductImage
+    ).
+    put(
+        multer({ dest: 'tmp/', limits: { fieldSize: 8 * 1024 * 1024 }}).single('image'),
+        authenticate.verifyUser,
+        authenticate.verifyAdmin,
+        productActions.addProductImage
+    )
 
 module.exports = productRouter;
