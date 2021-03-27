@@ -8,7 +8,7 @@ var User = require('../models/user');
 
 router.use(bodyParser.json());
 
-router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, function(req,
+router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, function(req,
                                                                            res,
                                                                            next) {
   User.find()
@@ -21,7 +21,7 @@ router.get('/',authenticate.verifyUser, authenticate.verifyAdmin, function(req,
 });
 
 router.post('/signup', (req, res, next) => {
-  User.register(new User({... req.body}),
+  User.register(new User({ email: req.body.email, username: req.body.username }),
       req.body.password, (err, user) => {
         if(err) {
           res.statusCode = 500;
@@ -29,7 +29,6 @@ router.post('/signup', (req, res, next) => {
           res.json({err: err});
         }
         else {
-          user.admin = true;
           user.save((err, user) => {
             if (err) {
               res.statusCode = 500;
