@@ -6,18 +6,18 @@ const addressSchema = require('./address');
 var passportLocalMongoose = require('passport-local-mongoose');
 
 var User = new Schema({
-    firstname: {
-        type: String,
-        required: true
-    },
-    lastname: {
-        type: String,
-        required: true
-    },
-    admin:   {
-        type: Boolean,
-        default: false
-    }
+  firstname: {
+    type: String,
+    required: true,
+  },
+  lastname: {
+    type: String,
+    required: true,
+  },
+  admin: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 User.plugin(passportLocalMongoose);
