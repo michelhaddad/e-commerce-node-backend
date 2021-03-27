@@ -49,6 +49,12 @@ const deleteProduct = (req, res, next) => {
 const addProductImage = (req, res, next) => {
   Products.findById(req.params.id).
       then((product) => {
+        if (!product) {
+          res.statusCode = 404;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({status: 'Product not found.'});
+          return;
+        }
         const s3 = new aws.S3();
         const params = {
           ACL: 'public-read',

@@ -117,3 +117,6 @@ dist
 
 .idea/*
 .idea
+
+# tmp folder
+tmp/
