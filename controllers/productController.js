@@ -29,17 +29,17 @@ const createProduct = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-const getProductById = (req, res, next) => {
-  Products.findById(req.params.id)
-    .then(
-      (product) => {
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(product);
-      },
-      (err) => next(err),
-    )
-    .catch((err) => next(err));
+const getProductById = async function (req, res) {
+  try {
+    const id = req.params.id;
+    const product = await Products.findById(id);
+    if (!product)
+      return res.status(404).json({ message: 'Product does not exist' });
+
+    res.status(200).json({ product });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const updateProduct = (req, res, next) => {
