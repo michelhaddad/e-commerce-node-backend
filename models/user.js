@@ -1,38 +1,136 @@
-require('mongoose-type-email');
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const passportLocalMongoose = require('passport-local-mongoose');
-const addressSchema = require('./address');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
-const User = new Schema({
+const Token = require('../models/token');
+
+const UserSchema = new mongoose.Schema(
+  {
     email: {
-        type: mongoose.SchemaTypes.Email,
-        required: true,
-        unique: true
+      type: String,
+      unique: true,
+      required: 'Your email is required',
+      trim: true,
     },
+
     username: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      unique: true,
+      required: false,
+      index: true,
+      sparse: true,
     },
-    admin:   {
-        type: Boolean,
-        default: false
+
+    password: {
+      type: String,
+      required: 'Your password is required',
+      max: 100,
     },
-    firstname: {
-        type: String
+
+    firstName: {
+      type: String,
+      required: 'First Name is required',
+      max: 100,
     },
-    lastname: {
-        type: String
+
+    lastName: {
+      type: String,
+      required: 'Last Name is required',
+      max: 100,
     },
-    profileUrl: {
-        type: String
+
+    bio: {
+      type: String,
+      required: false,
+      max: 255,
     },
-    address: {
-        type: addressSchema
-    }
+
+    roles: {
+      type: [
+        {
+          type: String,
+          enum: ['user', 'admin'],
+        },
+      ],
+      default: ['user'],
+    },
+
+    profileImage: {
+      type: String,
+      required: false,
+      max: 255,
+    },
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    resetPasswordToken: {
+      type: String,
+      required: false,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      required: false,
+    },
+  },
+  { timestamps: true },
+);
+
+UserSchema.pre('save', function (next) {
+  const user = this;
+
+  if (!user.isModified('password')) return next();
+
+  bcrypt.genSalt(10, function (err, salt) {
+    if (err) return next(err);
+
+    bcrypt.hash(user.password, salt, function (err, hash) {
+      if (err) return next(err);
+
+      user.password = hash;
+      next();
+    });
+  });
 });
 
-User.plugin(passportLocalMongoose);
+UserSchema.methods.comparePassword = function (password) {
+  return bcrypt.compareSync(password, this.password);
+};
 
-module.exports = mongoose.model('User', User);
+UserSchema.methods.generateJWT = function () {
+  const today = new Date();
+  const expirationDate = new Date(today);
+  expirationDate.setDate(today.getDate() + 60);
+
+  let payload = {
+    id: this._id,
+    email: this.email,
+    username: this.username,
+    firstName: this.firstName,
+    lastName: this.lastName,
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: parseInt(expirationDate.getTime() / 1000, 10),
+  });
+};
+
+UserSchema.methods.generatePasswordReset = function () {
+  this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
+  this.resetPasswordExpires = Date.now() + 3600000; //expires in an hour
+};
+
+UserSchema.methods.generateVerificationToken = function () {
+  let payload = {
+    userId: this._id,
+    token: crypto.randomBytes(20).toString('hex'),
+  };
+
+  return new Token(payload);
+};
+
+module.exports = mongoose.model('Users', UserSchema);
