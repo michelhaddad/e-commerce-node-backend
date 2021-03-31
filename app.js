@@ -1,4 +1,3 @@
-const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -7,6 +6,7 @@ const passport = require('passport');
 const mongoose = require('mongoose');
 const authenticate = require('./middlewares/authenticate');
 require('dotenv').config();
+require('jade');
 
 const indexRouter = require('./routes/index');
 const productRouter = require('./routes/productsRouter');
