@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const { sendEmail } = require('../utils/sendGrid');
+const { allowedFields } = require('../utils/constants');
 
 // @route GET admin/user
 // @desc Returns all users
@@ -74,50 +75,82 @@ exports.show = async function (req, res) {
   }
 };
 
-// @route PUT api/user/{id}
+// @route PUT api/user/info
 // @desc Update user details
 // @access Public
-/*
-exports.update = async function (req, res) {
+
+exports.updateInfo = async function (req, res) {
   try {
-    const update = req.body;
-    const id = req.params.id;
+    const updateInfo = req.body;
     const userId = req.user._id;
 
-    //Make sure the passed id is that of the logged in user
-    if (userId.toString() !== id.toString())
-      return res.status(401).json({
-        message: "Sorry, you don't have the permission to upd this data.",
+    if (Object.keys(updateInfo).length === 0) {
+      return res
+        .status(406)
+        .json({ message: 'No updated fields were provided' });
+    }
+
+    const allowedInfo = Object.keys(updateInfo)
+      .filter((field) => allowedFields.includes(field))
+      .reduce((obj, key) => {
+        obj[key] = updateInfo[key];
+        return obj;
+      }, {});
+
+    if (Object.keys(allowedInfo).length === 0) {
+      return res.status(403).json({
+        message: "You don't have the right to update these fields",
       });
+    }
 
     const user = await User.findByIdAndUpdate(
-      id,
-      { $set: update },
+      userId,
+      { $set: allowedInfo },
       { new: true },
     );
 
-    //if there is no image, return success message
-    if (!req.file)
-      return res.status(200).json({ user, message: 'User has been updated' });
-
-    //Attempt to upload to cloudinary
-    const result = await uploader(req);
-    const user_ = await User.findByIdAndUpdate(
-      id,
-      { $set: update },
-      { $set: { profileImage: result.url } },
-      { new: true },
-    );
-
-    if (!req.file)
-      return res
-        .status(200)
-        .json({ user: user_, message: 'User has been updated' });
+    res.status(200).json({ user, message: 'User has been updated' });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-*/
+
+// @route PUT api/user/image
+// @desc Update user details
+// @access Public
+
+// exports.image = async function (req, res) {
+//   try {
+//     const update = req.body;
+//     const userId = req.user._id;
+
+//     const user = await User.findByIdAndUpdate(
+//       userId,
+//       { $set: update },
+//       { new: true },
+//     );
+
+//     //if there is no image, return success message
+//     if (!req.file)
+//       return res.status(200).json({ user, message: 'User has been updated' });
+
+//     //Attempt to upload to cloudinary
+//     const result = await uploader(req);
+//     const user_ = await User.findByIdAndUpdate(
+//       id,
+//       { $set: update },
+//       { $set: { profileImage: result.url } },
+//       { new: true },
+//     );
+
+//     if (!req.file)
+//       return res
+//         .status(200)
+//         .json({ user: user_, message: 'User has been updated' });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 // @route DESTROY api/user/{id}
 // @desc Delete User
