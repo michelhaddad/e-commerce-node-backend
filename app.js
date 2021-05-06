@@ -8,10 +8,10 @@ const authenticate = require('./middlewares/authenticate');
 require('dotenv').config();
 require('jade');
 
-const indexRouter = require('./routes/index');
 const productRouter = require('./routes/productsRouter');
 const authRouter = require('./routes/authRouter');
 const userRouter = require('./routes/userRouter');
+const orderRouter = require('./routes/ordersRouter');
 
 const app = express();
 
@@ -40,9 +40,9 @@ app.use(cookieParser());
 app.use(passport.initialize());
 require('./middlewares/jwt')(passport);
 
-app.use('/', indexRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/user', authenticate, userRouter);
 app.use('/api/products', productRouter);
+app.use('/api/orders', orderRouter);
 
 module.exports = app;

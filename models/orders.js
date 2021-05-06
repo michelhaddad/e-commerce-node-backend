@@ -3,23 +3,13 @@ const Schema = mongoose.Schema;
 const addressSchema = require('./address');
 
 const orderItemSchema = new Schema({
-  itemId: {
-    type: String,
+  item: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
-  },
-  imageUrl: {
-    type: String,
-  },
-  price: {
-    type: Number,
-    required: true,
+    ref: 'Product',
   },
   quantity: {
     type: Number,
-    required: true,
-  },
-  title: {
-    type: String,
     required: true,
   },
 });
@@ -28,6 +18,11 @@ const orderSchema = new Schema({
   orderItems: {
     type: [orderItemSchema],
     required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
   },
   shippingAddress: {
     type: addressSchema,
