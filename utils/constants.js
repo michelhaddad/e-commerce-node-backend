@@ -1,4 +1,4 @@
-const allowedFields = ['firstName', 'lastName', 'address', 'phoneNumber'];
+const allowedFields = ['firstName', 'lastName', 'phoneNumber'];
 
 module.exports = {
   allowedFields,

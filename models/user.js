@@ -40,6 +40,12 @@ const UserSchema = new mongoose.Schema(
       max: 100,
     },
 
+    phoneNumber: {
+      type: String,
+      required: false,
+      max: 20,
+    },
+
     bio: {
       type: String,
       required: false,
@@ -56,7 +62,7 @@ const UserSchema = new mongoose.Schema(
       default: ['user'],
     },
 
-    profileImage: {
+    profileUrl: {
       type: String,
       required: false,
       max: 255,
