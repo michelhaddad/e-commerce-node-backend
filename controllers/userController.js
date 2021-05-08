@@ -131,7 +131,9 @@ exports.updateProfileImage = async function (req, res) {
       ACL: 'public-read',
       Bucket: process.env.AWS_BUCKET_NAME,
       Body: fs.createReadStream(req.file.path),
-      Key: `users/images/profile/${req.user._id + req.file.originalname}`,
+      Key: `users/images/profile/${req.user._id}.${req.file.originalname
+        .split('.')
+        .pop()}`,
       ContentType: req.file.mimetype,
     };
 
