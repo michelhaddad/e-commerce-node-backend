@@ -19,7 +19,6 @@ const createProduct = (req, res, next) => {
   Products.create(req.body)
     .then(
       (product) => {
-        console.log('Product Created ', product);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(product);
@@ -83,7 +82,9 @@ const addProductImage = (req, res, next) => {
           ACL: 'public-read',
           Bucket: process.env.AWS_BUCKET_NAME,
           Body: fs.createReadStream(req.file.path),
-          Key: `products/images/${req.params.id + req.file.originalname}`,
+          Key: `products/images/${req.params.id}.${req.file.originalname
+            .split('.')
+            .pop()}`,
           ContentType: req.file.mimetype,
         };
 
