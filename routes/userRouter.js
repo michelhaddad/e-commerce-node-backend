@@ -1,8 +1,8 @@
 const express = require('express');
 const { check } = require('express-validator');
-// const multer = require('multer');
+const multer = require('multer');
 
-const User = require('../controllers/userController');
+const userController = require('../controllers/userController');
 const validate = require('../middlewares/validate');
 
 const router = express.Router();
@@ -10,7 +10,7 @@ const router = express.Router();
 // const upload = multer().single('profileImage');
 
 //INDEX
-router.get('/', User.index);
+router.get('/', userController.index);
 
 //STORE
 router.post(
@@ -25,17 +25,25 @@ router.post(
     check('lastName').not().isEmpty().withMessage('You last name is required'),
   ],
   validate,
-  User.store,
+  userController.store,
 );
 
 //SHOW
-router.get('/:id', User.show);
+router.get('/:id', userController.show);
 
 //UPDATE
-router.put('/info', User.updateInfo);
+router.put('/info', userController.updateInfo);
 // router.put('/image', upload, User.image);
 
 //DELETE
-router.delete('/:id', User.destroy);
+router.delete('/:id', userController.destroy);
+
+router.put(
+  '/profile',
+  multer({ dest: 'tmp/', limits: { fieldSize: 8 * 1024 * 1024 } }).single(
+    'image',
+  ),
+  userController.updateProfileImage,
+);
 
 module.exports = router;
