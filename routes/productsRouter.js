@@ -28,7 +28,7 @@ productRouter
   });
 
 productRouter
-  .route('/image/:id')
+  .route('/:id/image')
   .post(
     multer({ dest: 'tmp/', limits: { fieldSize: 8 * 1024 * 1024 } }).single(
       'image',
