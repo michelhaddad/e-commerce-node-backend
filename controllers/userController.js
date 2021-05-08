@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const fs = require('fs');
+const aws = require('../utils/aws');
 const { sendEmail } = require('../utils/sendGrid');
 const { allowedFields } = require('../utils/constants');
 
@@ -118,39 +120,40 @@ exports.updateInfo = async function (req, res) {
 // @route PUT api/user/image
 // @desc Update user details
 // @access Public
+exports.updateProfileImage = async function (req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const s3 = new aws.S3();
+    const params = {
+      ACL: 'public-read',
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Body: fs.createReadStream(req.file.path),
+      Key: `users/images/profile/${req.user._id + req.file.originalname}`,
+      ContentType: req.file.mimetype,
+    };
 
-// exports.image = async function (req, res) {
-//   try {
-//     const update = req.body;
-//     const userId = req.user._id;
-
-//     const user = await User.findByIdAndUpdate(
-//       userId,
-//       { $set: update },
-//       { new: true },
-//     );
-
-//     //if there is no image, return success message
-//     if (!req.file)
-//       return res.status(200).json({ user, message: 'User has been updated' });
-
-//     //Attempt to upload to cloudinary
-//     const result = await uploader(req);
-//     const user_ = await User.findByIdAndUpdate(
-//       id,
-//       { $set: update },
-//       { $set: { profileImage: result.url } },
-//       { new: true },
-//     );
-
-//     if (!req.file)
-//       return res
-//         .status(200)
-//         .json({ user: user_, message: 'User has been updated' });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+    s3.upload(params, (err, data) => {
+      if (err) {
+        throw err;
+      }
+      if (data) {
+        fs.unlinkSync(req.file.path);
+        user.profileUrl = data.Location;
+        user.save();
+        res
+          .status(200)
+          .json({ user, message: 'Profile picture successfully updated' });
+      } else {
+        throw new Error('Image could not be saved to the S3 bucket.');
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // @route DESTROY api/user/{id}
 // @desc Delete User
