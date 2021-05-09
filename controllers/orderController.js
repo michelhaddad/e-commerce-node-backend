@@ -40,7 +40,16 @@ exports.createOrder = async (req, res, next) => {
       totalPrice,
       shippingAddress,
     };
-    const order = await Orders.create(orderData);
+    let order = await Orders.create(orderData);
+    order = await order
+      .populate({
+        path: 'orderItems',
+        populate: {
+          path: 'item',
+          model: 'Product',
+        },
+      })
+      .execPopulate();
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json(order);
