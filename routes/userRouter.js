@@ -28,6 +28,11 @@ router.post(
   userController.store,
 );
 
+router
+  .route('/favorites')
+  .get(userController.getUserFavorites)
+  .post(userController.addProductToFavorites);
+
 //SHOW
 router.get('/:id', userController.show);
 
