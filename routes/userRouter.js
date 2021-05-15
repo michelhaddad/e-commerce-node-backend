@@ -31,7 +31,8 @@ router.post(
 router
   .route('/favorites')
   .get(userController.getUserFavorites)
-  .post(userController.addProductToFavorites);
+  .post(userController.addProductToFavorites)
+  .delete(userController.removeProductFromFavorites);
 
 //SHOW
 router.get('/:id', userController.show);
