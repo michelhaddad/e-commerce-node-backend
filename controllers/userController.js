@@ -177,3 +177,38 @@ exports.destroy = async function (req, res) {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getUserFavorites = async (req, res, next) => {
+  try {
+    const id = req.user._id;
+    const user = await User.findById(id).populate('favorites');
+    if (!user) return res.status(404).json({ message: 'User does not exist' });
+
+    res.status(200).json({ items: user.favorites });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.addProductToFavorites = async (req, res) => {
+  try {
+    const productId = req.body.id;
+    let updatedFavorites = req.user.favorites;
+    if (updatedFavorites.includes(productId)) {
+      return res
+        .status(500)
+        .json({ message: 'Product is already added in favorites' });
+    }
+    updatedFavorites.push(productId);
+
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { favorites: updatedFavorites } },
+      { new: true },
+    );
+
+    res.status(200).json({ message: 'Product has been added to favorites' });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
