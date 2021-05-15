@@ -12,6 +12,7 @@ const productRouter = require('./routes/productsRouter');
 const authRouter = require('./routes/authRouter');
 const userRouter = require('./routes/userRouter');
 const orderRouter = require('./routes/ordersRouter');
+const productCollectionRouter = require('./routes/productCollectionsRouter');
 
 const app = express();
 
@@ -44,5 +45,6 @@ app.use('/api/auth', authRouter);
 app.use('/api/user', authenticate, userRouter);
 app.use('/api/products', productRouter);
 app.use('/api/orders', orderRouter);
+app.use('/api/collections', productCollectionRouter);
 
 module.exports = app;
