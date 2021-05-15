@@ -82,6 +82,13 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+
+    favorites: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+      },
+    ],
   },
   { timestamps: true },
 );
