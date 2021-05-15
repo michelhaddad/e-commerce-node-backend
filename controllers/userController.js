@@ -201,13 +201,37 @@ exports.addProductToFavorites = async (req, res) => {
     }
     updatedFavorites.push(productId);
 
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.user._id,
       { $set: { favorites: updatedFavorites } },
       { new: true },
     );
 
-    res.status(200).json({ message: 'Product has been added to favorites' });
+    res.status(200).json({ items: user.favorites });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+};
+
+exports.removeProductFromFavorites = async (req, res) => {
+  try {
+    const productId = req.body.id;
+    let updatedFavorites = req.user.favorites;
+    if (!updatedFavorites.includes(productId)) {
+      return res.status(500).json({ message: 'Product is not in favorites' });
+    }
+
+    updatedFavorites = updatedFavorites.filter(
+      (id) => id.toString() !== productId,
+    );
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { favorites: updatedFavorites } },
+      { new: true },
+    );
+
+    res.status(200).json({ items: user.favorites });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
