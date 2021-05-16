@@ -115,10 +115,6 @@ UserSchema.methods.comparePassword = function (password) {
 };
 
 UserSchema.methods.generateJWT = function () {
-  const today = new Date();
-  const expirationDate = new Date(today);
-  expirationDate.setDate(today.getDate() + 60);
-
   let payload = {
     id: this._id,
     email: this.email,
@@ -128,7 +124,7 @@ UserSchema.methods.generateJWT = function () {
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: parseInt(expirationDate.getTime() / 1000, 10),
+    expiresIn: '30d',
   });
 };
 
